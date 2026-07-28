@@ -29,7 +29,7 @@ class Star {
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        
+
         // Twinkling effect
         this.opacity += this.fadeSpeed * this.fadeDir;
         if (this.opacity >= 1 || this.opacity <= 0.1) {
@@ -157,7 +157,8 @@ if (scrollContainer) {
         'gcp.jpg',
         'linux.jpeg',
         'opmanager-nexus.webp',
-        'windows.png'
+        'windows.png',
+        'python.png'
     ];
 
     // Build the track HTML
