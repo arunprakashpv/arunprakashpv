@@ -3,8 +3,63 @@
    Black & White monochrome particle network
    ═══════════════════════════════════════════════════ */
 
+// ─── Analytics: fire a named event to GA4 + Clarity ───
+function trackEvent(name, params = {}) {
+    // Google Analytics 4
+    if (typeof window.gtag === 'function') {
+        window.gtag('event', name, params);
+    }
+    // Microsoft Clarity (custom tag) — no-op until Clarity is loaded
+    if (typeof window.clarity === 'function') {
+        window.clarity('event', name);
+    }
+}
+document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-track]');
+    if (!el) return;
+    trackEvent(el.getAttribute('data-track'), {
+        link_url: el.getAttribute('href') || '',
+        link_text: (el.textContent || '').trim().slice(0, 60)
+    });
+});
+
+// ─── Always land on the hero section on reload ───
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+(function landOnHero() {
+    const html = document.documentElement;
+    const originalBehavior = html.style.scrollBehavior;
+
+    function reset() {
+        if (window.location.hash) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        html.style.scrollBehavior = 'auto';
+        window.scrollTo(0, 0);
+        if (document.body) document.body.scrollTop = 0;
+        html.scrollTop = 0;
+    }
+
+    reset();
+    document.addEventListener('DOMContentLoaded', reset);
+    window.addEventListener('load', () => {
+        // Retry across a few frames to beat the browser's own scroll-to-anchor
+        reset();
+        let frames = 0;
+        (function retry() {
+            reset();
+            if (frames++ < 6) requestAnimationFrame(retry);
+            else html.style.scrollBehavior = originalBehavior;
+        })();
+    });
+    window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
+})();
+
 // ─── Animated Starfield Background ───
 const canvas = document.getElementById('bg-canvas');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobileViewport = window.innerWidth <= 768;
 const ctx = canvas.getContext('2d');
 let stars = [];
 
@@ -52,7 +107,11 @@ class Star {
 
 function initStars() {
     stars = [];
-    const count = Math.min(200, Math.floor((canvas.width * canvas.height) / 5000));
+    // Lighter density on mobile; skip entirely if the user asks for reduced motion
+    if (prefersReducedMotion) return;
+    const divisor = isMobileViewport ? 12000 : 5000;
+    const cap = isMobileViewport ? 60 : 200;
+    const count = Math.min(cap, Math.floor((canvas.width * canvas.height) / divisor));
     for (let i = 0; i < count; i++) {
         stars.push(new Star());
     }
@@ -61,6 +120,7 @@ initStars();
 
 function animateStars() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (prefersReducedMotion) return; // Static canvas, no animation loop
     stars.forEach(s => { s.update(); s.draw(); });
     requestAnimationFrame(animateStars);
 }
@@ -111,6 +171,31 @@ mobileToggle.addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open');
     mobileToggle.classList.toggle('open');
 });
+
+
+// ─── Scroll Affordances (hero hint + back-to-top FAB) ───
+const scrollHint = document.getElementById('scrollHint');
+const backToTop = document.getElementById('backToTop');
+
+function updateScrollAffordances() {
+    const y = window.scrollY;
+    if (scrollHint) scrollHint.classList.toggle('hidden', y > 40);
+    if (backToTop) backToTop.classList.toggle('visible', y > window.innerHeight * 0.6);
+}
+window.addEventListener('scroll', updateScrollAffordances, { passive: true });
+updateScrollAffordances();
+
+if (scrollHint) {
+    scrollHint.addEventListener('click', () => {
+        const next = document.getElementById('about');
+        if (next) next.scrollIntoView({ behavior: 'smooth' });
+    });
+}
+if (backToTop) {
+    backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
 
 
 // ─── Scroll Reveal ───
