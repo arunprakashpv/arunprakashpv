@@ -1465,10 +1465,11 @@ a.is-disabled:hover {
         transform: none;
     }
 
-    /* Mobile marquee: slower animation, no grayscale filter, pause when hero is off-screen.
-       Pause is controlled by the .marquee-paused class added via IntersectionObserver in script.js. */
+    /* Mobile marquee: slightly slower than desktop's 50s, pauses when hero is off-screen
+       via IntersectionObserver (.marquee-paused class). Not a big penalty now that logos
+       are fixed-slot and the track is GPU-composited. */
     .tools-scroll-track {
-        animation-duration: 90s;
+        animation-duration: 65s;
         gap: 3rem;
     }
 
