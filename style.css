@@ -307,11 +307,13 @@ h1, h2, h3, h4, h5, h6 {
     position: relative; margin-bottom: 2rem;
 }
 .hero-image-center img {
-    width: 200px; height: 200px; border-radius: 50%; object-fit: cover;
+    width: 200px; height: 200px; border-radius: 50%;
+    object-fit: cover; object-position: center 20%;
     border: 3px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     position: relative; z-index: 2;
     margin: 0;
+    background: var(--bg-elevated);
 }
 .image-glow-center {
     position: absolute; width: 200px; height: 200px; border-radius: 50%;
@@ -355,6 +357,8 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     padding-right: 4rem;
     animation: scroll-marquee 40s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
 }
 .tools-scroll:hover .tools-scroll-track {
     animation-play-state: paused;
@@ -577,6 +581,17 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--bg-card); border: none; border-radius: 40px;
     padding: 1.5rem 2rem; text-decoration: none; transition: var(--transition);
     box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    overflow: hidden;
+}
+.contact-card-modern > div {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.contact-card-modern .contact-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
 }
 .contact-card-modern:hover {
     background: var(--bg-card-hover); border-color: var(--border-hover);
@@ -700,6 +715,15 @@ a.is-disabled:hover {
     background: transparent !important;
     color: var(--text-dim) !important;
 }
+/* Contact cards keep their uniform look even when the link isn't wired yet —
+   only the cursor signals the placeholder state. */
+.contact-card-modern.is-disabled {
+    opacity: 1;
+}
+.contact-card-modern.is-disabled:hover {
+    background: var(--bg-card) !important;
+    color: inherit !important;
+}
 
 /* ─── Animations ─── */
 .animate-in {
@@ -727,6 +751,61 @@ a.is-disabled:hover {
 
 /* ─── Responsive ─── */
 @media (max-width: 1024px) {
+    /* Mobile perf: kill the expensive blurred clouds, canvas, and idle animations.
+       filter: blur(100px) is a GPU killer on phones; the starfield loop hogs the main thread. */
+    .ambient-cloud { display: none !important; }
+    #bg-canvas { display: none !important; }
+    .image-glow-center { animation: none !important; opacity: 0.35; }
+
+    /* Let the browser skip rendering off-screen sections until they're close to the viewport */
+    section.section {
+        content-visibility: auto;
+        contain-intrinsic-size: 100vh;
+    }
+
+    /* Faster scroll-reveal animations — 700ms was noticeably janky when many fired at once */
+    .animate-on-scroll {
+        transition: opacity 0.35s ease, transform 0.35s ease;
+        transform: translateY(20px);
+    }
+
+    /* About cards: stop the horizontal scroll on mobile, stack them instead */
+    .about-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        overflow: visible;
+        scroll-snap-type: none;
+    }
+    .bento-card {
+        min-width: 0;
+        padding: 1.5rem;
+        border-radius: 24px;
+        background: var(--bg-elevated); /* solid, not rgba — no compositing cost */
+    }
+
+    /* Solid backgrounds on the other floating cards too */
+    .skill-group,
+    .timeline-content,
+    .contact-card-modern { background: var(--bg-elevated); }
+
+    /* Disable hover transforms on touch devices (they still fire on tap on iOS) */
+    .timeline-content:hover,
+    .contact-card-modern:hover { transform: none; }
+
+    /* Mobile marquee: slower animation, no grayscale filter, pause when hero is off-screen.
+       Pause is controlled by the .marquee-paused class added via IntersectionObserver in script.js. */
+    .tools-scroll-track {
+        animation-duration: 90s;
+        gap: 3rem;
+    }
+    .tools-scroll-track img {
+        filter: opacity(0.85) !important;
+    }
+    .marquee-paused .tools-scroll-track {
+        animation-play-state: paused;
+    }
+
     #sidebar {
         transform: translateX(-100%);
         background: var(--bg);
@@ -788,7 +867,7 @@ a.is-disabled:hover {
 @media (max-width: 600px) {
     .hero-name { font-size: 2.25rem; }
     .hero-tagline { font-size: 1.1rem; }
-    .about-cards { grid-template-columns: 1fr; }
+    /* keep 2 columns on phones — 4 cards fit as a 2×2 grid, better than a 4-tall stack */
     .hero-cta { flex-direction: column; align-items: center; width: 100%; }
     .hero-cta .btn-primary, .hero-cta .btn-ghost { width: 100%; justify-content: center; }
     .contact-card-modern { padding: 1.25rem 1.5rem; }
@@ -796,11 +875,14 @@ a.is-disabled:hover {
 
     .hero-centered { padding: 5rem 5% 2rem 5%; }
     .hero-image-center img,
-    .image-glow-center { width: 150px; height: 150px; }
+    .image-glow-center { width: 180px; height: 180px; }
     .hero-desc { font-size: 1rem !important; }
     .section { padding: 3rem 5%; }
     .section-header { margin-bottom: 2.5rem; }
-    .bento-card { min-width: 240px; padding: 2rem; border-radius: 28px; }
+    .bento-card { min-width: 0; padding: 1.25rem; border-radius: 20px; }
+    .bento-card i { font-size: 1.4rem; margin-bottom: 0.75rem; }
+    .bento-card h3 { font-size: 0.95rem; }
+    .bento-card p { font-size: 0.75rem; }
     .skill-group { padding: 2rem; border-radius: 28px; }
     .timeline-content { padding: 1.5rem; border-radius: 28px; }
     .experience-timeline { padding-left: 2rem; }

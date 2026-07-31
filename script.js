@@ -60,10 +60,15 @@ if ('scrollRestoration' in history) {
 const canvas = document.getElementById('bg-canvas');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isMobileViewport = window.innerWidth <= 768;
-const ctx = canvas.getContext('2d');
+// On mobile / reduced-motion, skip the canvas entirely — the animation loop
+// and per-frame draws are the biggest source of stutter on low-end phones.
+const skipCanvas = prefersReducedMotion || isMobileViewport;
+if (skipCanvas && canvas) { canvas.style.display = 'none'; }
+const ctx = skipCanvas ? null : canvas.getContext('2d');
 let stars = [];
 
 function resizeCanvas() {
+    if (skipCanvas) return;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
@@ -107,11 +112,8 @@ class Star {
 
 function initStars() {
     stars = [];
-    // Lighter density on mobile; skip entirely if the user asks for reduced motion
-    if (prefersReducedMotion) return;
-    const divisor = isMobileViewport ? 12000 : 5000;
-    const cap = isMobileViewport ? 60 : 200;
-    const count = Math.min(cap, Math.floor((canvas.width * canvas.height) / divisor));
+    if (skipCanvas) return;
+    const count = Math.min(200, Math.floor((canvas.width * canvas.height) / 5000));
     for (let i = 0; i < count; i++) {
         stars.push(new Star());
     }
@@ -119,8 +121,8 @@ function initStars() {
 initStars();
 
 function animateStars() {
+    if (skipCanvas) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (prefersReducedMotion) return; // Static canvas, no animation loop
     stars.forEach(s => { s.update(); s.draw(); });
     requestAnimationFrame(animateStars);
 }
@@ -129,24 +131,26 @@ animateStars();
 
 // Typing effect removed due to hero restructure.
 
-// ─── ScrollSpy ───
+// ─── ScrollSpy (rAF-throttled, cached sections) ───
 const sidebarLinks = document.querySelectorAll('.sidebar-links a');
-
-window.addEventListener('scroll', () => {
+const spySections = [...document.querySelectorAll('section[id]')];
+let spyTicking = false;
+function runScrollSpy() {
     let current = '';
-    document.querySelectorAll('section').forEach(section => {
-        const top = section.offsetTop;
-        if (scrollY >= top - 300) {
-            current = section.getAttribute('id');
-        }
-    });
+    for (const section of spySections) {
+        if (window.scrollY >= section.offsetTop - 300) current = section.id;
+    }
     sidebarLinks.forEach(a => {
-        a.classList.remove('active');
-        if (a.getAttribute('href') === `#${current}`) {
-            a.classList.add('active');
-        }
+        a.classList.toggle('active', a.getAttribute('href') === `#${current}`);
     });
-});
+    spyTicking = false;
+}
+window.addEventListener('scroll', () => {
+    if (!spyTicking) {
+        requestAnimationFrame(runScrollSpy);
+        spyTicking = true;
+    }
+}, { passive: true });
 
 
 // ─── Smooth Scroll for Nav ───
@@ -251,10 +255,22 @@ if (scrollContainer) {
     localLogos.forEach(logo => {
         // If the image fails to load (because you haven't placed it in the folder yet), it completely removes itself!
         const name = logo.split('.')[0].replace(/-/g, ' ');
-        trackHTML += `<img src="assets/site_scroll/${logo}" alt="${name}" title="${name}" onerror="this.remove()">`;
+        trackHTML += `<img src="assets/site_scroll/${logo}" alt="${name}" title="${name}" width="60" height="35" loading="lazy" decoding="async" onerror="this.remove()">`;
     });
     trackHTML += '</div>';
 
     // Inject two identical tracks for the infinite marquee loop
     scrollContainer.innerHTML = trackHTML + trackHTML;
+
+    // Pause the marquee animation when the hero section is off-screen —
+    // no CPU spent animating something the user can't see.
+    const hero = document.getElementById('hero');
+    if (hero && 'IntersectionObserver' in window) {
+        const marqueeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                scrollContainer.classList.toggle('marquee-paused', !entry.isIntersecting);
+            });
+        }, { threshold: 0 });
+        marqueeObserver.observe(hero);
+    }
 }
