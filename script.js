@@ -24,36 +24,33 @@ document.addEventListener('click', (e) => {
 });
 
 // ─── Always land on the hero section on reload ───
+// Standard approach: disable the browser's automatic scroll restoration and
+// only reset once early. Do NOT keep retrying — that fights the user if they
+// swipe right after load and makes the scroll feel sticky.
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
 (function landOnHero() {
     const html = document.documentElement;
-    const originalBehavior = html.style.scrollBehavior;
+    let userHasScrolled = false;
+    const markScrolled = () => { userHasScrolled = true; };
+    window.addEventListener('wheel', markScrolled, { passive: true, once: true });
+    window.addEventListener('touchstart', markScrolled, { passive: true, once: true });
+    window.addEventListener('keydown', markScrolled, { once: true });
 
     function reset() {
+        if (userHasScrolled) return;
         if (window.location.hash) {
             history.replaceState(null, '', window.location.pathname + window.location.search);
         }
+        const prev = html.style.scrollBehavior;
         html.style.scrollBehavior = 'auto';
         window.scrollTo(0, 0);
-        if (document.body) document.body.scrollTop = 0;
-        html.scrollTop = 0;
+        html.style.scrollBehavior = prev;
     }
-
     reset();
-    document.addEventListener('DOMContentLoaded', reset);
-    window.addEventListener('load', () => {
-        // Retry across a few frames to beat the browser's own scroll-to-anchor
-        reset();
-        let frames = 0;
-        (function retry() {
-            reset();
-            if (frames++ < 6) requestAnimationFrame(retry);
-            else html.style.scrollBehavior = originalBehavior;
-        })();
-    });
-    window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
+    document.addEventListener('DOMContentLoaded', reset, { once: true });
+    window.addEventListener('load', reset, { once: true });
 })();
 
 // ─── Animated Starfield Background ───
@@ -241,13 +238,25 @@ if (scrollContainer) {
     // List of logo files you drop into the assets/site_scroll folder
     // Add the exact filenames here when you download new logos!
     const localLogos = [
-        'aws.webp',
-        'azure.jpeg',
+        'aws.png',
+        'azure.png',
         'gcp.png',
-        'linux.jpeg',
-        'opmanager-nexus.webp',
-        'windows.png',
-        'python.png'
+        'linux.png',
+        'OpManager Nexus_with ME_Black.png',
+        'windows_server.svg',
+        'python.png',
+        'Directory-logo-lockup.png',
+        'Catalyst-logo-lockup.png',
+        'Creator-logo-lockup.png',
+        'Sites-logo-lockup.png',
+        'RPA-logo-lockup.png',
+        'MCP-logo-lockup.png',
+        'git.png',
+        'ManageEngine Endpoint Central.png',
+        'Identity360_with ME_Black.png',
+        'Apache Tomcat.png',
+        'Gemini.png',
+        'Claude.png'
     ];
 
     // Build the track HTML
@@ -255,7 +264,8 @@ if (scrollContainer) {
     localLogos.forEach(logo => {
         // If the image fails to load (because you haven't placed it in the folder yet), it completely removes itself!
         const name = logo.split('.')[0].replace(/-/g, ' ');
-        trackHTML += `<img src="assets/site_scroll/${logo}" alt="${name}" title="${name}" width="60" height="35" loading="lazy" decoding="async" onerror="this.remove()">`;
+        // eager loading + fixed dimensions so the track width is stable from first paint (no marquee jerk as images resolve)
+        trackHTML += `<img src="assets/site_scroll/${logo}" alt="${name}" title="${name}" width="100" height="28" loading="eager" decoding="async" onerror="this.remove()">`;
     });
     trackHTML += '</div>';
 
