@@ -256,7 +256,8 @@ if (scrollContainer) {
         'Identity360_with ME_Black.png',
         'Apache Tomcat.png',
         'Gemini.png',
-        'Claude.png'
+        'Claude.png',
+        'Github.png'
     ];
 
     // Build the track HTML
