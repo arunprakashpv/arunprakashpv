@@ -243,7 +243,7 @@ if (scrollContainer) {
     const localLogos = [
         'aws.webp',
         'azure.jpeg',
-        'gcp.jpg',
+        'gcp.png',
         'linux.jpeg',
         'opmanager-nexus.webp',
         'windows.png',
