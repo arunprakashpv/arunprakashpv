@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Version History - Infra Network Designer</title>
+  <link rel="icon" type="image/png" href="assets/images/iptoolkit-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .history-container {
+      padding: 20px 0;
+    }
+
+    .release {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .release:last-child {
+      border-bottom: none;
+    }
+
+    .release-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .release-version {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .release-date {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .release-changes {
+      list-style-type: none;
+    }
+
+    .release-changes li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .release-changes li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 16px;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="header-left">
+        <div class="logo-container">
+          <svg viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="IP Tool Kit" width="200"
+            height="54">
+            <g transform="translate(20, 20)">
+              <rect width="100" height="100" rx="22" fill="#236DB4" />
+              <rect x="17" y="17" width="66" height="66" rx="13" fill="none" stroke="#FFFFFF" stroke-width="2.5"
+                opacity="0.35" />
+              <rect x="31" y="31" width="38" height="38" rx="8" fill="none" stroke="#FFFFFF" stroke-width="2.5"
+                opacity="0.75" />
+              <rect x="41" y="41" width="18" height="18" rx="4" fill="#FFFFFF" />
+            </g>
+            <text x="145" y="55" font-family="'Zoho Puvi', 'Puvi', 'Inter', sans-serif" font-weight="500"
+              letter-spacing="2" font-size="13" class="logo-sub">arunprakashpv</text>
+            <text x="145" y="105" font-family="'Zoho Puvi', 'Puvi', 'Inter', sans-serif" font-weight="700"
+              letter-spacing="-0.5" font-size="32" class="logo-title">Infra Network Designer</text>
+          </svg>
+        </div>
+        <div class="subtitle">Design full network topologies and generate Terraform automatically.</div>
+      </div>
+      <div class="header-right">
+        <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="section active">
+      <div class="panel">
+        <a href="index.html" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Back to Designer
+        </a>
+
+        <div class="panel-title">Version History</div>
+        <div class="panel-desc">Keep track of the latest updates and improvements to the Infra Network Designer.</div>
+
+        <div class="history-container">
+
+          <div class="release">
+            <div class="release-header">
+              <div class="release-version">v1.0.0</div>
+              <div class="release-date">August 1, 2026</div>
+            </div>
+            <ul class="release-changes">
+              <li>Added comprehensive project documentation (README.md).</li>
+              <li>Implemented a changelog tracking system (CHANGELOG.md).</li>
+              <li>Created a dedicated version history web page matching the main site's aesthetic.</li>
+              <li>Standardized the directory structure by moving CSS and JS into separate assets folders.</li>
+              <li>Reorganized image assets into a structured directory for better maintainability.</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer
+    style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 14px; padding-bottom: 20px;">
+    <div style="margin-bottom: 8px;">
+      Created by <a href="https://arunprakashpv.github.io/" target="_blank" rel="noopener noreferrer"
+        style="color: var(--accent); text-decoration: none; font-weight: 500;">Arun Prakash P V</a> — Infrastructure
+      Specialist
+    </div>
+    <div>
+      <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Home</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/script.js"></script>
+</body>
+
+</html>
